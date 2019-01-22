@@ -17,6 +17,10 @@ class AbstractMap():
     def generate_next_iterate(self):
         pass
 
+    @abc.abstractmethod
+    def generate_cobweb_base(self):
+        pass
+
     def get_next_iterate(self):
         self.t.append(self.t[-1] + 1)
         self.x.append(self.generate_next_iterate())
@@ -28,6 +32,22 @@ class AbstractMap():
         plt.ylabel('x')
         plt.ylim(0, 1)
         plt.show()
+
+    def show_current_cobweb_plot(self, skip=50):
+        plt.plot(self.x[skip:-1], self.x[skip+1:], color='red')
+        xmin = min(self.x)
+        xmax = max(self.x)
+        xrange = [xmin + (xmax - xmin) * i / 100 for i in range(1, 100)]
+        plt.plot(self.x[skip:-1], self.x[skip+1:], color='red')
+        plt.plot(xrange, xrange, color='gray')
+        plt.plot(*self.generate_cobweb_base(), color='blue')
+        plt.legend(('Attractor', 'Generic constant x', 'Map-specific constant x'))
+        plt.show()
+
+    def generate_cobweb_plot(self, iterates=100, skip=50):
+        for i in range(0, iterates):
+            self.get_next_iterate()
+        self.show_current_cobweb_plot(skip)
 
     def generate_time_plot(self, iterates=50):
         for i in range(0, iterates):
@@ -48,6 +68,15 @@ class LogisticMap(AbstractMap):
     def generate_next_iterate(self):
         return self.r * self.get_last_x() * (1 - self.get_last_x())
 
+    def generate_cobweb_base(self):
+        xmin = min(self.x)
+        xmax = max(self.x)
+        xrange = [xmin + (xmax - xmin) * i / 100 for i in range(1, 100)]
+        ys = []
+        for x in xrange:
+            ys.append(self.r * x - self.r * x * x)
+        return xrange, ys
+
 
 class QuadraticMap(AbstractMap):
     def __init__(self, x0, r):
@@ -57,21 +86,29 @@ class QuadraticMap(AbstractMap):
     def generate_next_iterate(self):
         return (self.r * self.get_last_x() * self.get_last_x()) - 1
 
+    def generate_cobweb_base(self):
+        xmin = min(self.x)
+        xmax = max(self.x)
+        xrange = [xmin + (xmax - xmin) * i / 100 for i in range(1, 100)]
+        ys = []
+        for x in xrange:
+            ys.append(self.r * x * x - 1)
+        return xrange, ys
+
 
 if __name__ == "__main__":
-    # logistic_map = LogisticMap(.3, 3.6)
-    # logistic_map.generate_time_plot(1000)
-    # print(logistic_map.get_last_x())
+    map = QuadraticMap(0.2, 1.3)
+    map.generate_cobweb_plot(100)
 
-    xs = []
-    ys = []
-    for i in range(0, 1000):
-        k = 2.9 + .9 * i / 1000
-        quadratic_map = LogisticMap(.2, k)
-        for y in quadratic_map.get_bifurcation_portrait_slice():
-            xs.append(k)
-            ys.append(y)
-    plt.scatter(xs, ys, c='black', marker='.')
-    plt.xlabel('k')
-    plt.ylabel('x distribution')
-    plt.show()
+    # xs = []
+    # ys = []
+    # for i in range(0, 1000):
+    #     k = 2.9 + .9 * i / 1000
+    #     quadratic_map = LogisticMap(.2, k)
+    #     for y in quadratic_map.get_bifurcation_portrait_slice():
+    #         xs.append(k)
+    #         ys.append(y)
+    # plt.scatter(xs, ys, c='black', marker='.')
+    # plt.xlabel('k')
+    # plt.ylabel('x distribution')
+    # plt.show()
