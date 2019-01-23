@@ -21,6 +21,16 @@ class AbstractMap():
     def generate_cobweb_base(self):
         pass
 
+    @staticmethod
+    @abc.abstractmethod
+    def get_min_k():
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_max_k():
+        pass
+
     def get_next_iterate(self):
         self.t.append(self.t[-1] + 1)
         self.x.append(self.generate_next_iterate())
@@ -59,6 +69,21 @@ class AbstractMap():
             self.get_next_iterate()
         return self.x[-iterations_to_show:]
 
+    @classmethod
+    def generate_bifurcation_portrait(cls):
+        xs = []
+        ys = []
+        for i in range(0, 10000):
+            k = cls.get_min_k() + (cls.get_max_k() - cls.get_min_k()) * i / 10000
+            map = cls(.2, k)
+            for y in map.get_bifurcation_portrait_slice():
+                xs.append(k)
+                ys.append(y)
+        plt.scatter(xs, ys, c='black', marker='.', s=.1)
+        plt.xlabel('k')
+        plt.ylabel('x distribution')
+        plt.show()
+
 
 class LogisticMap(AbstractMap):
     def __init__(self, x0, r):
@@ -76,6 +101,14 @@ class LogisticMap(AbstractMap):
         for x in xrange:
             ys.append(self.r * x - self.r * x * x)
         return xrange, ys
+
+    @staticmethod
+    def get_min_k():
+        return 2
+
+    @staticmethod
+    def get_max_k():
+        return 4
 
 
 class QuadraticMap(AbstractMap):
@@ -95,6 +128,14 @@ class QuadraticMap(AbstractMap):
             ys.append(self.r * x * x - 1)
         return xrange, ys
 
+    @staticmethod
+    def get_min_k():
+        return 1
+
+    @staticmethod
+    def get_max_k():
+        return 2
+
 
 class TentMap(AbstractMap):
     def __init__(self, x0, r):
@@ -109,20 +150,15 @@ class TentMap(AbstractMap):
     def generate_cobweb_base(self):
         raise RuntimeError('Not implemented')
 
+    @staticmethod
+    def get_min_k():
+        return 1
+
+    @staticmethod
+    def get_max_k():
+        return 2
+
 
 if __name__ == "__main__":
-    # map = QuadraticMap(0.2, 1.3)
-    # map.generate_cobweb_plot(100)
-
-    xs = []
-    ys = []
-    for i in range(0, 10000):
-        k = 1 + 1 * i / 10000
-        quadratic_map = TentMap(.2, k)
-        for y in quadratic_map.get_bifurcation_portrait_slice():
-            xs.append(k)
-            ys.append(y)
-    plt.scatter(xs, ys, c='black', marker='.', s=.1)
-    plt.xlabel('k')
-    plt.ylabel('x distribution')
-    plt.show()
+    map = QuadraticMap(0.2, 1.3)
+    map.generate_bifurcation_portrait()
