@@ -100,15 +100,15 @@ if __name__ == "__main__":
     map = QuadraticMap(0.2, 1.3)
     map.generate_cobweb_plot(100)
 
-    # xs = []
-    # ys = []
-    # for i in range(0, 1000):
-    #     k = 2.9 + .9 * i / 1000
-    #     quadratic_map = LogisticMap(.2, k)
-    #     for y in quadratic_map.get_bifurcation_portrait_slice():
-    #         xs.append(k)
-    #         ys.append(y)
-    # plt.scatter(xs, ys, c='black', marker='.')
-    # plt.xlabel('k')
-    # plt.ylabel('x distribution')
-    # plt.show()
+    xs = []
+    ys = []
+    for i in range(0, 10000):
+        k = 2 + 2 * i / 10000
+        quadratic_map = LogisticMap(.2, k)
+        for y in quadratic_map.get_bifurcation_portrait_slice():
+            xs.append(k)
+            ys.append(y)
+    plt.scatter(xs, ys, c='black', marker='.', s=.1)
+    plt.xlabel('k')
+    plt.ylabel('x distribution')
+    plt.show()
