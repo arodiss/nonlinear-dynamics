@@ -54,7 +54,7 @@ class AbstractMap():
             self.get_next_iterate()
         self.show_current_time_plot()
 
-    def get_bifurcation_portrait_slice(self, iterations_to_skip=1000, iterations_to_show=100):
+    def get_bifurcation_portrait_slice(self, iterations_to_skip=1000, iterations_to_show=30):
         for i in range(0, iterations_to_skip + iterations_to_show):
             self.get_next_iterate()
         return self.x[-iterations_to_show:]
@@ -96,15 +96,29 @@ class QuadraticMap(AbstractMap):
         return xrange, ys
 
 
+class TentMap(AbstractMap):
+    def __init__(self, x0, r):
+        super(TentMap, self).__init__(x0)
+        self.r = r
+
+    def generate_next_iterate(self):
+        if self.get_last_x() < .5:
+            return self.r * self.get_last_x()
+        return self.r * (1 - self.get_last_x())
+
+    def generate_cobweb_base(self):
+        raise RuntimeError('Not implemented')
+
+
 if __name__ == "__main__":
-    map = QuadraticMap(0.2, 1.3)
-    map.generate_cobweb_plot(100)
+    # map = QuadraticMap(0.2, 1.3)
+    # map.generate_cobweb_plot(100)
 
     xs = []
     ys = []
     for i in range(0, 10000):
-        k = 2 + 2 * i / 10000
-        quadratic_map = LogisticMap(.2, k)
+        k = 1 + 1 * i / 10000
+        quadratic_map = TentMap(.2, k)
         for y in quadratic_map.get_bifurcation_portrait_slice():
             xs.append(k)
             ys.append(y)
