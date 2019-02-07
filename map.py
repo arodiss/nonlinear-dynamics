@@ -1,6 +1,9 @@
 from __future__ import division
 import abc
 import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+from tqdm import tqdm
 
 
 class AbstractMap():
@@ -102,6 +105,48 @@ class AbstractMap():
         plt.show()
 
 
+    @classmethod
+    def generate_reverse_bifurcation_frame(cls, k):
+        xs = []
+        ys = []
+        for i in range(0, 100):
+            map = cls(i / 100, k)
+            slice = map.get_bifurcation_portrait_slice(iterations_to_show=10)
+            for x in slice:
+                for y in slice:
+                    xs.append(x)
+                    ys.append(y)
+        fig = plt.figure()
+        fig.add_subplot()
+        plt.scatter(xs, ys, c='black', marker='.', s=.1)
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.title('k = {}'.format(k))
+        plt.xlabel('x distribution')
+        plt.ylabel('x distribution')
+        fig.canvas.draw()
+        data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+        frame = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        fig.clear()
+        plt.close()
+        return frame
+
+
+    @classmethod
+    def generate_reverse_bifurcation_video(cls):
+        out = cv2.VideoWriter(
+            'out.mp4',
+            cv2.VideoWriter_fourcc(*'mp4v'),
+            20.0,
+            (640, 640)
+        )
+        for i in tqdm(range(0, 2000)):
+            k = cls.get_min_k() + (cls.get_max_k() - cls.get_min_k()) * i / 2000
+            frame = cls.generate_reverse_bifurcation_frame(k)
+            out.write(cv2.resize(frame, (640, 640)))
+        out.release()
+
+
 class LogisticMap(AbstractMap):
     def __init__(self, x0, r):
         super(LogisticMap, self).__init__(x0)
@@ -177,5 +222,6 @@ class TentMap(AbstractMap):
 
 
 if __name__ == "__main__":
-    map = LogisticMap(0.2, 1.3)
-    map.generate_reverse_bifurcation_portrait()
+    LogisticMap.generate_reverse_bifurcation_portrait()
+
+
