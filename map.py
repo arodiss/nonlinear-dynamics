@@ -10,9 +10,6 @@ class AbstractMap():
         self.t = [1]
         self.x = [x0]
 
-    def get_last_x(self):
-        return self.x[-1]
-
     @abc.abstractmethod
     def generate_next_iterate(self):
         pass
@@ -30,6 +27,9 @@ class AbstractMap():
     @abc.abstractmethod
     def get_max_k():
         pass
+
+    def get_last_x(self):
+        return self.x[-1]
 
     def get_next_iterate(self):
         self.t.append(self.t[-1] + 1)
@@ -81,6 +81,23 @@ class AbstractMap():
                 ys.append(y)
         plt.scatter(xs, ys, c='black', marker='.', s=.1)
         plt.xlabel('k')
+        plt.ylabel('x distribution')
+        plt.show()
+
+    @classmethod
+    def generate_reverse_bifurcation_portrait(cls):
+        xs = []
+        ys = []
+        for i in range(0, 10000):
+            k = cls.get_min_k() + (cls.get_max_k() - cls.get_min_k()) * i / 10000
+            map = cls(.2, k)
+            slice = map.get_bifurcation_portrait_slice(iterations_to_show=10)
+            for x in slice:
+                for y in slice:
+                    xs.append(x)
+                    ys.append(y)
+        plt.scatter(xs, ys, c='black', marker='.', s=.1)
+        plt.xlabel('x distribution')
         plt.ylabel('x distribution')
         plt.show()
 
@@ -160,5 +177,5 @@ class TentMap(AbstractMap):
 
 
 if __name__ == "__main__":
-    map = QuadraticMap(0.2, 1.3)
-    map.generate_bifurcation_portrait()
+    map = LogisticMap(0.2, 1.3)
+    map.generate_reverse_bifurcation_portrait()
